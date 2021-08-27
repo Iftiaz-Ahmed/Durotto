@@ -103,6 +103,9 @@ class _CommonMainState extends State<CommonMain> {
                 Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) =>
                     LoginPage()), (Route<dynamic> route) => false);
                 _userBloc.user.clear();
+                _userBloc.distance = 0.0;
+                _userBloc.start = "";
+                _userBloc.destination = "";
               },
               child: Padding(
                 padding: const EdgeInsets.only(right: 10.0, top: 5),

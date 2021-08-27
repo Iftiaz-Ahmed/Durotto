@@ -23,6 +23,13 @@ class UserBloc extends ChangeNotifier{
     notifyListeners();
   }
 
+  String _start = "";
+  String get start => _start;
+  set start(String value) {
+    _start = value;
+    notifyListeners();
+  }
+
   String _destination = "";
   String get destination => _destination;
   set destination(String value) {

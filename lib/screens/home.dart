@@ -23,6 +23,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  bool loadOnce = false;
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   final userAddress = new TextEditingController();
   final destination = new TextEditingController();
@@ -33,20 +34,19 @@ class _HomePageState extends State<HomePage> {
 
   GoogleApiServices _googleApiServices = GoogleApiServices();
 
-  getLocation() async {
-    if (mounted) {
+  getLocation(userBloc) async {
+    if (loadOnce == false) {
       var location = new Location();
       currentLocation = await location.getLocation();
 
       _googleApiServices.getNameFromLatLng(currentLocation.latitude.toString(), currentLocation.longitude.toString()).then((value) {
-          userAddress.text = value;
+          loadOnce = true;
+          userBloc.start = value;
       });
     }
   }
 
   getDestinationCoordinates(placeID, userBloc) async {
-    GeoCode geoCode = GeoCode();
-
     try {
       _googleApiServices.getLatLngFromPlaceID(placeID.toString()).then((value) {
 
@@ -80,7 +80,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   storeRecord(distance, userBloc) {
-
     var record = {
       "start": userAddress.text,
       "createdAt": Timestamp.now(),
@@ -89,22 +88,19 @@ class _HomePageState extends State<HomePage> {
       "start_latLng": [currentLocation.latitude, currentLocation.longitude],
       "end_latLng": [destinationLocation.latitude, destinationLocation.longitude],
     };
-    print(record);
+
     CollectionReference users = FirebaseFirestore.instance.collection('users').doc(userBloc.user['email']).collection("records");
     users.add(record);
   }
 
   @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    getLocation();
-  }
-
-
-  @override
   Widget build(BuildContext context) {
     UserBloc _userBloc = Provider.of<UserBloc>(context);
+    getLocation(_userBloc);
+    var displayName = _userBloc.user['name']!=null?_userBloc.user["name"]:"";
+    setState(() {
+      userAddress.text = _userBloc.start;
+    });
 
     return SingleChildScrollView(
       child: Container(
@@ -121,7 +117,7 @@ class _HomePageState extends State<HomePage> {
               ),
               Container(
                 child: AutoSizeText(
-                  "Welcome, " + _userBloc.user["name"],
+                  "Welcome, " + displayName,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w900,
