@@ -28,4 +28,13 @@ class GoogleApiServices{
     return [lat, lng];
   }
 
+  Future<String> getNameFromLatLng(lat, lng) async {
+    String url = "https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&key=$apiKey";
+    http.Response response = await http.get(Uri.parse(url));
+    Map values = jsonDecode(response.body);
+    var address = values["results"][0]["formatted_address"];
+
+    return address;
+  }
+
 }

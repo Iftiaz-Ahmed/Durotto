@@ -5,12 +5,12 @@ import 'package:durotto/services/google_services.dart';
 import 'package:durotto/services/notification_api.dart';
 import 'package:durotto/state_management/user_bloc.dart';
 import 'package:flutter_focus_watcher/flutter_focus_watcher.dart';
+import 'package:geocode/geocode.dart';
 import 'package:google_maps_webservice/places.dart' as WebServices;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_google_places/flutter_google_places.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:geocode/geocode.dart';
 import 'package:location/location.dart';
 import 'package:provider/provider.dart';
 
@@ -33,25 +33,13 @@ class _HomePageState extends State<HomePage> {
 
   GoogleApiServices _googleApiServices = GoogleApiServices();
 
-  var address = "";
-
   getLocation() async {
     if (mounted) {
       var location = new Location();
-      GeoCode geoCode = GeoCode();
-      Future<Address> locationName;
-
-
       currentLocation = await location.getLocation();
 
-      locationName = geoCode.reverseGeocoding(latitude: currentLocation.latitude!, longitude: currentLocation.longitude!);
-      locationName.then((value) {
-        var road = value.streetNumber != null? value.streetNumber.toString() + ', ':'';
-        address = road + value.streetAddress! + ', ' + value.city! + ', ' + value.countryName! + ', ' + value.postal!;
-        print(address);
-        setState(() {
-          userAddress.text = address;
-        });
+      _googleApiServices.getNameFromLatLng(currentLocation.latitude.toString(), currentLocation.longitude.toString()).then((value) {
+          userAddress.text = value;
       });
     }
   }
